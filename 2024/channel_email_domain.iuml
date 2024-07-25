@@ -1,6 +1,61 @@
 @startuml
 
-Alice -> Bob: Hello
-Bob -> Alice: Hi!
+entity 租户 {
+  tenant_id
+}
 
+entity 邮件通道全局配置 {
+  tenant_id
+  疲劳度
+}
+
+entity ESP账号 {
+  esp_type
+  host
+  port
+  username
+  password
+}
+entity ESP通道 {
+  region
+}
+
+entity 发送记录 {
+  msg_id
+  status
+  subject
+  from_email
+  to_emial
+  body
+  additions: Map
+  ...
+}
+
+entity webhook记录 {
+  msg_id
+  status
+  desc
+}
+
+class SMTP连接池{
+  + connections
+}
+
+interface EmailChannel{
+  send_email()
+  send_email_batch()
+  send_email_concurrency()
+}
+EmailChannel --> 发送记录
+EmailChannel -- SMTP连接池
+
+interface EmailWebhook{
+}
+EmailWebhook --> webhook记录
+
+租户 "1" --> "*" ESP账号
+租户 "1" --> "1" 邮件通道全局配置
+ESP账号 "1" --> "*" ESP通道
+ESP通道 "1" --> "*" 发送记录
+发送记录 "1" --> "*" webhook记录
 @enduml
