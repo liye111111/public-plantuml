@@ -1,0 +1,99 @@
+@startuml
+
+ top to bottom direction
+
+node gateway[
+gateway
+---
+统一接入网关
+- api_routing
+- push长连接管理
+]
+
+
+
+
+node chat_ai[
+chat_ai
+---
+人机交互接口
+]
+
+
+node fosterflow_automation
+node f2ai_channel[
+f2ai_channel
+---
+触发渠道
+emai
+sms
+webpush
+pop-up
+]
+node f2ai_udp[
+f2ai_udp
+---
+Audience
+FLow
+]
+
+rectangle database{
+database mysql.channel[
+mysql.channel
+---
+]
+
+database mysql.udp[
+mysql.udp
+----
+OLTP
+- Audience定义
+- Flow定义
+]
+database starrocks[
+starrocks
+---
+OLAP
+- user_view
+- event_view
+
+]
+}
+
+rectangle middleware{
+node task_scheduler_server{
+component task_scheduler_lib
+}
+
+
+database zk
+queue kafka
+queue rocketMQ[
+rocketMQ
+---
+延迟队列
+]
+node apollo[
+apollo
+---
+配置中心
+]
+}
+
+cloud google_ads
+cloud cloud_channel
+
+gateway --> chat_ai
+gateway --> f2ai_udp
+gateway --> fosterflow_automation
+chat_ai --> f2ai_udp
+f2ai_udp --> f2ai_channel
+f2ai_channel --> cloud_channel
+fosterflow_automation --> google_ads
+fosterflow_automation --> starrocks
+f2ai_channel --> mysql.channel
+
+f2ai_udp-->mysql.udp
+f2ai_udp-->starrocks
+
+@enduml
